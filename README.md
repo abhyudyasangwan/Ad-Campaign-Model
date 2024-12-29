@@ -2,6 +2,8 @@
 
 This project analyzes digital marketing campaign performance using advanced data preprocessing, feature engineering, visualization, and machine learning techniques to optimize decision-making and budget allocation. It helps develop a feedback mechanism using GPT-4 LLM techniques.
 
+![Sample Image](https://i.imgur.com/RWb6ISb.jpeg)
+
 ---
 
 ## Table of Contents
@@ -12,9 +14,10 @@ This project analyzes digital marketing campaign performance using advanced data
 5. [Campaign Decisions](#campaign-decisions)
 6. [Model Training](#model-training)
 7. [Optimization](#optimization)
-8. [Suggested Actions](#suggested-actions)
-9. [Usage](#usage)
-10. [Requirements](#requirements)
+8. [Automation](#automation)
+9. [LLM Feedback Mechanism](#llm-feedback-mechanism)
+10. [Usage](#usage)
+11. [Requirements](#requirements)
 
 ---
 
@@ -210,6 +213,12 @@ Threshold for Relevance:
 
 3) In most industries, a 1% CTR is considered the minimum benchmark for an ad to be deemed effective.
 
+   **Code Example:**
+```python
+# Campaign decision rules
+df['Pause'] = df['CTR'].apply(lambda ctr: 1 if ctr < 1.0 else 0)
+```
+
 2. **Increase Budget:** When ROAS > 4.
 
    **What is ROAS?**
@@ -238,13 +247,31 @@ Threshold for Relevance:
 
 3) Increasing the budget for high-ROAS campaigns ensures that resources are focused on the most profitable campaigns, maximizing overall revenue.
 
+   **Code Example:**
+```python
+# Campaign decision rules
+df['increase_budget'] = df['ROAS'].apply(lambda roas: 1 if roas > 4.0 else 0)
+```
+
 3. **Decrease Budget:** When ROAS < 1.5.
+
+**Why is ROAS < 1.5 a Good Benchmark to Decrease Budget?**
+
+1) A ROAS of less than 1.5 means that for every ₹1 spent on advertising, less than ₹1.50 in revenue is generated, leaving minimal or no profit margins. Prevents Budget Wastage:
+
+2) Continuing to allocate a significant budget to a low-performing campaign leads to wasted resources with little or no return. Signals Poor Ad Efficiency:
+
+3) ROAS < 1.5 suggests issues with the campaign, such as irrelevant targeting, weak creatives, or suboptimal audience engagement. Allows for Reallocation:
+
+4) Reducing the budget for underperforming campaigns frees up funds that can be redirected to better-performing campaigns, maximizing overall returns. Helps Focus on Optimization:
+
+5) Decreasing the budget prevents overspending while you analyze and fix the underlying issues, such as improving ad quality, adjusting targeting, or refining offers.
+
+
 
 **Code Example:**
 ```python
 # Campaign decision rules
-df['Pause'] = df['CTR'].apply(lambda ctr: 1 if ctr < 1.0 else 0)
-df['increase_budget'] = df['ROAS'].apply(lambda roas: 1 if roas > 4.0 else 0)
 df['decrease_budget'] = df['ROAS'].apply(lambda roas: 1 if roas < 1.5 else 0)
 ```
 
@@ -288,6 +315,38 @@ print(f"R² Score: {r2_score(y_test, y_pred)}")
 1. Removed outlier ranges from the dataset.
 2. Increased the number of estimators in the Random Forest model for better accuracy.
 
+**Visualization for Outlier Detection:**
+
+**Code Example:**
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Plot the ROAS values
+plt.figure(figsize=(12, 6))
+plt.plot(df['ROAS'], marker='o', linestyle='-', color='b', label='ROAS')
+
+# Customizing the x-axis
+plt.title('ROAS Values')
+plt.xlabel('Index')
+plt.ylabel('ROAS')
+plt.legend()
+plt.grid(True)
+
+num_ticks = 20 
+indices = np.linspace(0, len(df) - 1, num=num_ticks, dtype=int)
+plt.xticks(indices, labels=df.index[indices], rotation=45)
+
+plt.tight_layout()
+plt.show()
+```
+
+**Plot:**
+
+![Sample Image](https://i.imgur.com/C9n6sXT.png)
+
+**Removing outlier ranges:**
+
 **Code Example:**
 ```python
 # Remove outliers
@@ -300,17 +359,192 @@ model = RandomForestRegressor(n_estimators=2000, random_state=42)
 model.fit(X_train, y_train)
 ```
 
+**Increased n_estimators:**
+
+```python
+rf = RandomForestRegressor(n_estimators=2000, random_state=42)  # Increased n_estimators
+rf.fit(X_train, y_train)
+```
+
 ---
 
-## Suggested Actions
+## Automation
 
 Use the trained model to predict ROAS for future campaigns and optimize ad spend accordingly.
 
 **Code Example:**
 ```python
 def predict_roas(model, scaler, feature_sequence):
+    if len(feature_sequence) != len(X.columns):
+        raise ValueError(f"Expected {len(X.columns)} features, got {len(feature_sequence)}")
+
     feature_sequence_scaled = scaler.transform([feature_sequence])
-    return model.predict(feature_sequence_scaled)[0]
+
+    # Predicting ROAS
+    roas_prediction = model.predict(feature_sequence_scaled)
+    return roas_prediction[0]
+```
+
+**Example Usage:**
+
+```python
+feature_values = [1000, 2, 41, 0.2, 17, 2, 80, 10, 5, 1, 0, 1, 0, 1, 0, 5] 
+
+try:
+    predicted_roas = predict_roas(rf, scaler, feature_values)
+    print(f"Predicted ROAS: {predicted_roas}")
+except ValueError as e:
+    print(f"Error: {e}")
+```
+
+**Output Suggested Action:**
+
+```python
+if(feature_values[1] < 1.0):
+  feature_values.insert(16,1)
+  print("Pause Campaign")
+else:
+  feature_values.insert(16,0)
+
+if(predicted_roas > 4.0):
+  feature_values.insert(17,1)
+  print("Increase Budget")
+else:
+  feature_values.insert(17,0)
+
+if(predicted_roas < 1.5):
+  feature_values.insert(18,1)
+  print("Decrease Budget")
+else:
+  feature_values.insert(18,0)
+```
+
+**Function to randomly generate feature values, predict ROAS, and take action:**
+
+```python
+def generate_data_and_predict(model, scaler, num_samples=100):
+    # Defined min/max ranges of the features
+    features = [
+        'Impressions', 'CTR', 'Clicks', 'daily_average_cpc', 'Spend',
+        'Conversions', 'Likes', 'Shares', 'Comments', 'City/Location_London',
+        'City/Location_Manchester', 'Channel_Instagram', 'Channel_Pinterest',
+        'Device_Mobile', 'Ad_Discount', 'CPC'
+    ]
+
+    min_values = [12.2, 0.1, 0, 0.01, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.090909]
+    max_values = [3725, 2.6, 62, 2.68, 101, 11, 148, 59, 29, 1, 1, 1, 1, 1, 1, 87]
+
+    # Generated random data
+    data = []
+    for _ in range(num_samples):
+        feature_values = [np.random.uniform(low, high) for low, high in zip(min_values, max_values)]
+
+        predicted_roas = predict_roas(model, scaler, feature_values)
+
+        if feature_values[1] < 1.0:
+            feature_values.append(1)
+            action = "Pause Campaign"
+        else:
+            feature_values.append(0)
+
+        if predicted_roas > 4.0:
+            feature_values.append(1)
+            action = "Increase Budget"
+        else:
+            feature_values.append(0)
+
+        if predicted_roas < 1.5:
+            feature_values.append(1)
+            action = "Decrease Budget"
+        else:
+            feature_values.append(0)
+
+        # Appended predicted ROAS and action to the feature values
+        feature_values.append(predicted_roas)
+        feature_values.append(action)
+        data.append(feature_values)
+
+    columns = features + ['Pause Campaign', 'Increase Budget', 'Decrease Budget', 'Predicted ROAS', 'Action Taken']
+    df = pd.DataFrame(data, columns=columns)
+
+    return df
+```
+
+**Filteration:**
+
+Removing all those rows which have conflicting decisions due to irregular data generation. I.e. Model predicting both Pause Campaign and Increase Budget at the same time. This happens because the data we use is not real world campaign data, instead is randomly generated.
+
+```python
+# Filtered rows where any two of the three columns have a value of 1
+filtered_sd = sd[~((sd['Pause Campaign'] + sd['Increase Budget'] + sd['Decrease Budget']) > 1)]
+```
+
+---
+
+## LLM Feedback Mechanism
+
+The code generates feedback for the user based on the feature values and prediction outcome.
+
+**Parameters:**
+
+feature_values (dict): User-inputted feature values.
+
+predicted_roas (float): The predicted ROAS value.
+
+action_taken (str): The action taken based on conditions.
+
+**Code Example:**
+```python
+import os
+from openai import OpenAI
+
+# Set up OpenAI client
+client = OpenAI(api_key="**hidden**")
+
+# Function to get feedback from GPT
+def get_feedback(feature_values, predicted_roas, action_taken):
+
+    messages = [
+        {
+            "role": "user",
+            "content": f"""
+            You are a marketing optimization expert. A user has provided the following campaign details:
+            Feature Values: {feature_values}
+            Predicted ROAS: {predicted_roas}
+            Action Taken: {action_taken}
+
+            Based on this, provide detailed feedback for improving their campaign, focusing on:
+            - Highlighting any feature value outside recommended ranges.
+            - Suggestions to improve ROAS and overall campaign performance.
+            """
+        }
+    ]
+
+    chat_completion = client.chat.completions.create(
+        messages=messages,
+        model="gpt-4o" 
+    )
+
+    return chat_completion.choices[0].message.content.strip()
+```
+
+**Example usage:**
+
+```python
+feature_values = {
+    "Impressions": 1000,
+    "CTR": 0.9,
+    "Clicks": 40,
+    "daily_average_cpc": 0.3,
+    # Add other features here
+}
+predicted_roas = 3.5
+action_taken = "Increase Budget"
+
+# Get feedback
+feedback = get_feedback(feature_values, predicted_roas, action_taken)
+print("Feedback from GPT:")
+print(feedback)
 ```
 
 ---
