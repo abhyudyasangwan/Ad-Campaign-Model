@@ -1,6 +1,6 @@
 # Ad Campaign Performance Analysis
 
-This project analyzes digital marketing campaign performance using advanced data preprocessing, feature engineering, visualization, and machine learning techniques to optimize decision-making and budget allocation. It helps develop a feedback mechanism using GPT-4 LLM techniques.
+This project analyzes digital marketing campaign performance using advanced data preprocessing, feature engineering, visualization, and machine learning techniques to optimize decision-making and budget allocation. It helps develop a feedback mechanism using GPT-4 LLM trained on market data.
 
 ![Sample Image](https://i.imgur.com/RWb6ISb.jpeg)
 
