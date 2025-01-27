@@ -207,9 +207,9 @@ visualize_dataset(df)
 
 Threshold for Relevance:
 
-1) A CTR of less than 1% often means the ad fails to engage the audience, signaling potential issues with targeting, creatives, or messaging. Efficient Use of Budget:
+1) A CTR of less than 1% often means the ad fails to engage the audience, signaling potential issues with targeting, creatives, or messaging. E
 
-2) Ads with CTR < 1% may waste budget on impressions without generating enough clicks, making the campaign cost-inefficient. Industry Benchmark:
+2) Ads with CTR < 1% may waste budget on impressions without generating enough clicks, making the campaign cost-inefficient.
 
 3) In most industries, a 1% CTR is considered the minimum benchmark for an ad to be deemed effective.
 
@@ -241,9 +241,9 @@ df['Pause'] = df['CTR'].apply(lambda ctr: 1 if ctr < 1.0 else 0)
 
 **Why is ROAS > 4 a Good Benchmark to Increase Budget?**
 
-1) A ROAS greater than 4 means that for every ₹1 spent on advertising, at least ₹4 in revenue is generated. This represents a highly profitable campaign. Scalable Performance:
+1) A ROAS greater than 4 means that for every ₹1 spent on advertising, at least ₹4 in revenue is generated. This represents a highly profitable campaign. 
 
-2) Campaigns with high ROAS suggest that the current strategy is effective and scalable. Increasing the budget can amplify returns while maintaining efficiency. Optimal Allocation of Resources:
+2) Campaigns with high ROAS suggest that the current strategy is effective and scalable. Increasing the budget can amplify returns while maintaining efficiency. 
 
 3) Increasing the budget for high-ROAS campaigns ensures that resources are focused on the most profitable campaigns, maximizing overall revenue.
 
@@ -257,13 +257,13 @@ df['increase_budget'] = df['ROAS'].apply(lambda roas: 1 if roas > 4.0 else 0)
 
 **Why is ROAS < 1.5 a Good Benchmark to Decrease Budget?**
 
-1) A ROAS of less than 1.5 means that for every ₹1 spent on advertising, less than ₹1.50 in revenue is generated, leaving minimal or no profit margins. Prevents Budget Wastage:
+1) A ROAS of less than 1.5 means that for every ₹1 spent on advertising, less than ₹1.50 in revenue is generated, leaving minimal or no profit margins. 
 
-2) Continuing to allocate a significant budget to a low-performing campaign leads to wasted resources with little or no return. Signals Poor Ad Efficiency:
+2) Continuing to allocate a significant budget to a low-performing campaign leads to wasted resources with little or no return. 
 
-3) ROAS < 1.5 suggests issues with the campaign, such as irrelevant targeting, weak creatives, or suboptimal audience engagement. Allows for Reallocation:
+3) ROAS < 1.5 suggests issues with the campaign, such as irrelevant targeting, weak creatives, or suboptimal audience engagement. 
 
-4) Reducing the budget for underperforming campaigns frees up funds that can be redirected to better-performing campaigns, maximizing overall returns. Helps Focus on Optimization:
+4) Reducing the budget for underperforming campaigns frees up funds that can be redirected to better-performing campaigns, maximizing overall returns. 
 
 5) Decreasing the budget prevents overspending while you analyze and fix the underlying issues, such as improving ad quality, adjusting targeting, or refining offers.
 
